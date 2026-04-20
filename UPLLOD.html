@@ -1,0 +1,429 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Boogaloo&display=swap');
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body { background: transparent; }
+
+  #race-wrapper {
+    font-family: 'Boogaloo', 'Arial Black', sans-serif;
+    background: linear-gradient(180deg, #0a2a0a 0%, #1a4a1a 100%);
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+    border: 3px solid #f5c842;
+    position: relative;
+  }
+
+  #marquee-banner {
+    background: #f5c842;
+    color: #1a1a1a;
+    text-align: center;
+    font-size: 22px;
+    letter-spacing: 4px;
+    padding: 8px 0;
+    text-transform: uppercase;
+    border-bottom: 3px solid #c8a200;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #marquee-banner::before, #marquee-banner::after {
+    content: '★ ';
+    color: #c8a200;
+  }
+
+  #scoreboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 20px;
+    background: rgba(0,0,0,0.4);
+    border-bottom: 2px solid #f5c842;
+  }
+
+  #scoreboard-header span {
+    color: #f5c842;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  #race-track {
+    position: relative;
+    padding: 8px 0;
+  }
+
+  .lane {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .lane:nth-child(odd) { background: rgba(0,0,0,0.15); }
+  .lane:nth-child(even) { background: rgba(255,255,255,0.04); }
+
+  .lane-num {
+    width: 28px;
+    text-align: center;
+    color: #f5c842;
+    font-size: 13px;
+    flex-shrink: 0;
+    z-index: 2;
+  }
+
+  .golfer-name {
+    width: 148px;
+    font-size: 12px;
+    color: #fff;
+    flex-shrink: 0;
+    padding-left: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 2;
+  }
+
+  .track-area {
+    flex: 1;
+    position: relative;
+    height: 42px;
+    overflow: hidden;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px) 0 0 / 12.5% 100%,
+      linear-gradient(90deg, rgba(245,200,66,0.18), rgba(245,200,66,0.02));
+    border-left: 1px solid rgba(245,200,66,0.25);
+  }
+
+  .cart-container {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: left 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 3;
+  }
+
+  .wins-bubble {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #f5c842;
+    color: #1a1a1a;
+    font-size: 12px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: bold;
+    z-index: 4;
+    flex-shrink: 0;
+    min-width: 40px;
+    text-align: center;
+  }
+
+  #controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 12px;
+    background: rgba(0,0,0,0.4);
+    border-top: 2px solid #f5c842;
+  }
+
+  .btn {
+    background: #f5c842;
+    color: #1a1a1a;
+    border: none;
+    padding: 8px 24px;
+    font-size: 16px;
+    font-family: inherit;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: transform 0.1s, background 0.1s;
+  }
+
+  .btn:hover { background: #ffd700; transform: scale(1.04); }
+  .btn:active { transform: scale(0.97); }
+  .btn.secondary { background: transparent; color: #f5c842; border: 2px solid #f5c842; }
+  .btn.secondary:hover { background: rgba(245,200,66,0.15); }
+
+  #status-bar {
+    text-align: center;
+    color: #f5c842;
+    font-size: 14px;
+    padding: 6px;
+    background: rgba(0,0,0,0.3);
+    letter-spacing: 1px;
+    min-height: 30px;
+  }
+
+  #lights-overlay {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.85);
+    padding: 24px 40px;
+    border-radius: 12px;
+    border: 3px solid #f5c842;
+  }
+
+  #lights-overlay.visible { display: flex; }
+
+  .light-row {
+    display: flex;
+    gap: 14px;
+  }
+
+  .light {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: #333;
+    border: 3px solid #555;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+
+  .light.red { background: #e83030; border-color: #ff6060; box-shadow: 0 0 18px #e83030; }
+  .light.yellow { background: #f5c842; border-color: #ffd700; box-shadow: 0 0 18px #f5c842; }
+  .light.green { background: #2ec82e; border-color: #5eff5e; box-shadow: 0 0 18px #2ec82e; }
+
+  #lights-label {
+    color: #f5c842;
+    font-size: 22px;
+    letter-spacing: 3px;
+    margin-top: 4px;
+  }
+</style>
+
+<div id="race-wrapper">
+  <div id="marquee-banner">★ MGA Wednesday Night 2026 — Golf Cart Derby ★</div>
+
+  <div id="scoreboard-header">
+    <span># &nbsp; Golfer</span>
+    <span>Points Race ➤ Updated Weekly Through Oct. 14, 2026</span>
+  </div>
+
+  <div id="race-track"></div>
+
+  <div id="status-bar">WEEKLY POINTS RACE — UPDATE THE STANDINGS EACH WEDNESDAY THROUGH OCT. 14, 2026.</div>
+
+  <div id="lights-overlay">
+    <div class="light-row" id="light-row"></div>
+    <div id="lights-label">READY...</div>
+  </div>
+
+  <div id="controls">
+    <button class="btn" id="btn-start" onclick="startRace()">Update Standings</button>
+    <button class="btn secondary" id="btn-reset" onclick="resetRace()">Reset View</button>
+  </div>
+</div>
+
+<script>
+const SEASON_END_LABEL = 'Oct. 14, 2026';
+
+const golfers = [
+  { name: "Joey Cabrera", wins: 3.0 },
+  { name: "David Radford", wins: 2.5 },
+  { name: "Wayne Ball", wins: 2.0 },
+  { name: "Barry Perry", wins: 2.0 },
+  { name: "Denis Hayes", wins: 2.0 },
+  { name: "Chris Farrell", wins: 2.0 },
+  { name: "Scotty Wilkins", wins: 1.5 },
+  { name: "Patric Westbrook", wins: 1.5 },
+  { name: "Jimmy McGuire", wins: 1.5 },
+  { name: "Jason Poe", wins: 1.5 },
+  { name: "Matt Torcasso", wins: 1.5 },
+  { name: "Paul Ratkovic", wins: 1.0 },
+  { name: "Greg Slaughter", wins: 1.0 },
+  { name: "Art Menius", wins: 1.0 },
+  { name: "Andrew George", wins: 0.5 },
+  { name: "Joe Ristiano", wins: 0.5 },
+  { name: "Matt Brooks", wins: 0.5 },
+  { name: "Josh Burns", wins: 0.5 }
+];
+
+const CART_COLORS = [
+  '#e83030','#f5c842','#2ec82e','#3a9ff5','#e84de8',
+  '#ff7b00','#00e5e5','#fff','#ff69b4','#a2ff3a',
+  '#ffa07a','#b87fff','#7fffd4','#ff4500','#1e90ff',
+  '#ffec8b','#adff2f','#dc143c'
+];
+
+function makeCartSVG(color) {
+  return `<svg width="54" height="32" viewBox="0 0 54 32" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="14" width="40" height="13" rx="4" fill="${color}" stroke="#fff" stroke-width="1"/>
+    <rect x="8" y="7" width="20" height="12" rx="3" fill="${color}" stroke="#fff" stroke-width="1"/>
+    <rect x="9" y="9" width="8" height="7" rx="1" fill="rgba(150,220,255,0.7)" stroke="#fff" stroke-width="0.5"/>
+    <rect x="19" y="9" width="8" height="7" rx="1" fill="rgba(150,220,255,0.7)" stroke="#fff" stroke-width="0.5"/>
+    <circle cx="10" cy="28" r="4.5" fill="#222" stroke="#ccc" stroke-width="1.2"/>
+    <circle cx="10" cy="28" r="2" fill="#888"/>
+    <circle cx="32" cy="28" r="4.5" fill="#222" stroke="#ccc" stroke-width="1.2"/>
+    <circle cx="32" cy="28" r="2" fill="#888"/>
+    <rect x="42" y="17" width="10" height="3" rx="1.5" fill="#f5c842"/>
+    <circle cx="52" cy="18.5" r="2" fill="#fffbe0" opacity="0.85"/>
+  </svg>`;
+}
+
+const track = document.getElementById('race-track');
+const statusBar = document.getElementById('status-bar');
+const overlay = document.getElementById('lights-overlay');
+const lightRow = document.getElementById('light-row');
+const lightsLabel = document.getElementById('lights-label');
+const startButton = document.getElementById('btn-start');
+
+let cartEls = [];
+let winsEls = [];
+let animRunning = false;
+
+function getLeader() {
+  return golfers.reduce((best, g) => g.wins > best.wins ? g : best, golfers[0]);
+}
+
+function getMaxPoints() {
+  return Math.max(...golfers.map(g => g.wins), 1);
+}
+
+function formatPoints(value) {
+  return value % 1 === 0 ? value.toFixed(0) : value.toFixed(1);
+}
+
+function buildTrack() {
+  track.innerHTML = '';
+  cartEls = [];
+  winsEls = [];
+
+  golfers.forEach((g, i) => {
+    const lane = document.createElement('div');
+    lane.className = 'lane';
+
+    const laneNum = document.createElement('div');
+    laneNum.className = 'lane-num';
+    laneNum.textContent = i + 1;
+
+    const name = document.createElement('div');
+    name.className = 'golfer-name';
+    name.textContent = g.name;
+    name.title = g.name;
+
+    const trackArea = document.createElement('div');
+    trackArea.className = 'track-area';
+
+    const cartC = document.createElement('div');
+    cartC.className = 'cart-container';
+    cartC.style.left = '4px';
+    cartC.innerHTML = makeCartSVG(CART_COLORS[i % CART_COLORS.length]);
+
+    const winsBubble = document.createElement('div');
+    winsBubble.className = 'wins-bubble';
+    winsBubble.textContent = formatPoints(g.wins);
+
+    trackArea.appendChild(cartC);
+    trackArea.appendChild(winsBubble);
+
+    lane.appendChild(laneNum);
+    lane.appendChild(name);
+    lane.appendChild(trackArea);
+
+    track.appendChild(lane);
+    cartEls.push(cartC);
+    winsEls.push(winsBubble);
+  });
+
+  renderStandings(false);
+}
+
+function renderStandings(animate = true) {
+  const maxPoints = getMaxPoints();
+
+  cartEls.forEach((cartEl, i) => {
+    const trackAreaWidth = cartEl.parentElement.offsetWidth;
+    const cartWidth = 54;
+    const bubbleBuffer = 52;
+    const usableTravel = Math.max(trackAreaWidth - cartWidth - bubbleBuffer - 8, 12);
+    const targetFraction = golfers[i].wins / maxPoints;
+    const leftPos = 4 + Math.round(usableTravel * targetFraction);
+
+    cartEl.style.transition = animate ? 'left 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none';
+    cartEl.style.left = leftPos + 'px';
+    winsEls[i].textContent = formatPoints(golfers[i].wins);
+  });
+}
+
+function resetRace() {
+  if (animRunning) return;
+  renderStandings(false);
+  const leader = getLeader();
+  statusBar.textContent = `CURRENT LEADER: ${leader.name.toUpperCase()} WITH ${formatPoints(leader.wins)} POINTS — SEASON RUNS THROUGH ${SEASON_END_LABEL}.`;
+}
+
+function startRace() {
+  if (animRunning) return;
+  startButton.disabled = true;
+  statusBar.textContent = 'UPDATING WEEKLY POINTS STANDINGS...';
+  showLights();
+}
+
+function showLights() {
+  animRunning = true;
+  lightRow.innerHTML = '';
+  const lights = [null, null, null, null, null].map(() => {
+    const l = document.createElement('div');
+    l.className = 'light';
+    lightRow.appendChild(l);
+    return l;
+  });
+  lightsLabel.textContent = 'READY...';
+  overlay.classList.add('visible');
+
+  let step = 0;
+  const seq = [
+    () => { lights[0].classList.add('red'); lightsLabel.textContent = 'SET...'; },
+    () => { lights[1].classList.add('red'); },
+    () => { lights[2].classList.add('red'); },
+    () => { lights[3].classList.add('red'); },
+    () => { lights[4].classList.add('red'); lightsLabel.textContent = 'UPDATE!'; },
+    () => {
+      lights.forEach(l => { l.className = 'light green'; });
+      setTimeout(() => {
+        overlay.classList.remove('visible');
+        runRace();
+      }, 450);
+    }
+  ];
+
+  function tick() {
+    if (step < seq.length) {
+      seq[step]();
+      step++;
+      setTimeout(tick, step < 6 ? 350 : 0);
+    }
+  }
+
+  tick();
+}
+
+function runRace() {
+  renderStandings(true);
+
+  setTimeout(() => {
+    const leader = getLeader();
+    statusBar.textContent = `CURRENT LEADER: ${leader.name.toUpperCase()} WITH ${formatPoints(leader.wins)} POINTS — NEXT UPDATE WEDNESDAY, THROUGH ${SEASON_END_LABEL}.`;
+    animRunning = false;
+    startButton.disabled = false;
+  }, 1000);
+}
+
+window.addEventListener('resize', () => {
+  renderStandings(false);
+});
+
+buildTrack();
+resetRace();
+</script>
