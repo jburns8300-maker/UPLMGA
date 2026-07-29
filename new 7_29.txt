@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MGA Wednesday Night 2026 — Live Leaderboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Boogaloo&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #102610;
+    padding: 12px;
+    font-family: 'Boogaloo', Arial, sans-serif;
+  }
+  #race-wrapper {
+    max-width: 980px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, #0a2a0a 0%, #1a4a1a 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid #f5c842;
+    position: relative;
+  }
+  #marquee-banner {
+    background: #f5c842;
+    color: #1a1a1a;
+    text-align: center;
+    font-size: clamp(18px, 3vw, 26px);
+    letter-spacing: 3px;
+    padding: 10px;
+    text-transform: uppercase;
+    border-bottom: 3px solid #c8a200;
+  }
+  #summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: #b89500;
+    border-bottom: 2px solid #f5c842;
+  }
+  .summary-card {
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    text-align: center;
+    padding: 9px 5px;
+  }
+  .summary-card strong {
+    display: block;
+    color: #f5c842;
+    font-size: 21px;
+  }
+  .summary-card span {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  #scoreboard-header {
+    display: grid;
+    grid-template-columns: 38px minmax(135px, 1.15fr) minmax(180px, 3fr) 58px 66px 72px;
+    align-items: center;
+    padding: 8px 10px;
+    background: rgba(0,0,0,.55);
+    border-bottom: 2px solid #f5c842;
+    color: #f5c842;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  #race-track { position: relative; padding: 5px 0; }
+  .lane {
+    display: grid;
+    grid-template-columns: 38px minmax(135px, 1.15fr) minmax(180px, 3fr) 58px 66px 72px;
+    align-items: center;
+    min-height: 44px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding: 0 10px;
+  }
+  .lane:nth-child(odd) { background: rgba(0,0,0,.15); }
+  .lane:nth-child(even) { background: rgba(255,255,255,.04); }
+  .rank {
+    color: #f5c842;
+    text-align: center;
+    font-size: 14px;
+  }
+  .golfer-name {
+    color: #fff;
+    padding: 0 8px 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+  }
+  .track-area {
+    position: relative;
+    height: 42px;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .track-line {
+    position: absolute;
+    left: 0;
+    right: 18px;
+    top: 21px;
+    height: 2px;
+    background: rgba(255,255,255,.18);
+  }
+  .finish-line {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 18px;
+    height: 100%;
+    background: repeating-conic-gradient(#fff 0% 25%, #000 0% 50%) 0 0 / 9px 9px;
+    opacity: .75;
+    z-index: 5;
+  }
+  .cart-container {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 4px;
+    transition: left .5s cubic-bezier(.25,.46,.45,.94);
+    z-index: 3;
+  }
+  .stat {
+    color: #fff;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+  }
+  .wins {
+    color: #1a1a1a;
+    background: #f5c842;
+    border-radius: 12px;
+    padding: 3px 5px;
+    font-weight: 800;
+    margin: 0 auto;
+    min-width: 34px;
+  }
+  #status-bar {
+    text-align: center;
+    color: #f5c842;
+    font-size: 14px;
+    padding: 8px;
+    background: rgba(0,0,0,.35);
+    letter-spacing: 1px;
+    min-height: 34px;
+    font-family: Arial, sans-serif;
+  }
+  #controls {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(0,0,0,.45);
+    border-top: 2px solid #f5c842;
+  }
+  .btn {
+    background: #f5c842;
+    color: #1a1a1a;
+    border: none;
+    padding: 9px 20px;
+    font-size: 15px;
+    font-family: inherit;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .btn.secondary {
+    background: transparent;
+    color: #f5c842;
+    border: 2px solid #f5c842;
+  }
+  .btn:disabled { opacity: .55; cursor: not-allowed; }
+  #lights-overlay {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,.88);
+    padding: 24px 40px;
+    border-radius: 12px;
+    border: 3px solid #f5c842;
+  }
+  #lights-overlay.visible { display: flex; }
+  .light-row { display: flex; gap: 12px; }
+  .light {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #333; border: 3px solid #555;
+  }
+  .light.red { background: #e83030; border-color: #ff6060; box-shadow: 0 0 18px #e83030; }
+  .light.green { background: #2ec82e; border-color: #5eff5e; box-shadow: 0 0 18px #2ec82e; }
+  #lights-label { color: #f5c842; font-size: 22px; letter-spacing: 3px; }
+  #setup-warning {
+    display: none;
+    background: #fff3cd;
+    color: #3c2f00;
+    padding: 10px 14px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    border-bottom: 2px solid #f5c842;
+  }
+  @media (max-width: 680px) {
+    body { padding: 0; }
+    #race-wrapper { border-radius: 0; border-left: 0; border-right: 0; }
+    #summary { grid-template-columns: repeat(2, 1fr); }
+    #scoreboard-header, .lane {
+      grid-template-columns: 30px minmax(110px, 1fr) minmax(130px, 2fr) 44px;
+    }
+    .optional-stat { display: none; }
+    #scoreboard-header { font-size: 9px; padding-left: 4px; padding-right: 4px; }
+    .lane { padding-left: 4px; padding-right: 4px; }
+    .golfer-name { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div id="race-wrapper">
+  <div id="marquee-banner">★ MGA Wednesday Night 2026 — Live Golf Cart Derby ★</div>
+  <div id="setup-warning"></div>
+  <div id="summary">
+    <div class="summary-card"><strong id="leader-name">—</strong><span>Current Leader</span></div>
+    <div class="summary-card"><strong id="leader-wins">—</strong><span>Leading Wins</span></div>
+    <div class="summary-card"><strong id="player-count">—</strong><span>Players with Wins</span></div>
+    <div class="summary-card"><strong id="last-updated">—</strong><span>Loaded</span></div>
+  </div>
+  <div id="scoreboard-header">
+    <span>#</span><span>Golfer</span><span>Race Track</span>
+    <span>Wins</span><span class="optional-stat">Tee</span><span class="optional-stat">Avg Net</span>
+  </div>
+  <div id="race-track"></div>
+  <div id="status-bar">LOADING LIVE LEADERBOARD…</div>
+  <div id="lights-overlay">
+    <div class="light-row" id="light-row"></div>
+    <div id="lights-label">READY…</div>
+  </div>
+  <div id="controls">
+    <button class="btn" id="btn-start" type="button">Start Race</button>
+    <button class="btn secondary" id="btn-reset" type="button">Reset</button>
+    <button class="btn secondary" id="btn-refresh" type="button">Refresh Data</button>
+  </div>
+</div>
+
+<script>
+/*
+SETUP:
+1. Import the Excel workbook into Google Sheets.
+2. Share or publish the sheet so anyone with the link can view it.
+3. Replace the URL below with a Google Sheets CSV export URL.
+
+Recommended URL format:
+https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/gviz/tq?tqx=out:csv&sheet=Total%20Wins
+*/
+const SPREADSHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT93dXGwSNmK8AIcYZ-Ub7xESs0bSEHzUzSrqI_x-NxRLEVz4M_6-xkUeS-bSKYrHKL8BtRYnpTHXp3/pub?gid=1851992239&single=true&output=csv";
+
+const FALLBACK_DATA = [{"name": "Denis Hayes", "wins": 7.0, "times": 15, "pot": 1, "avg": -0.13333333333333333}, {"name": "Jimmy McGuire", "wins": 6.5, "times": 17, "pot": 1, "avg": 0.4117647058823529}, {"name": "Barry Perry", "wins": 5.0, "times": 16, "pot": 0, "avg": 2.0625}, {"name": "Dick Pilotte", "wins": 5.0, "times": 13, "pot": 0, "avg": 0.6153846153846154}, {"name": "Jason Poe", "wins": 3.5, "times": 11, "pot": 3, "avg": 0.5454545454545454}, {"name": "Jerry Neal", "wins": 3.5, "times": 16, "pot": 1, "avg": 1.5625}, {"name": "Josh Burns", "wins": 3.0, "times": 17, "pot": 4, "avg": 1.411764705882353}, {"name": "Tim Rutt", "wins": 3.0, "times": 10, "pot": 0, "avg": 1.4}, {"name": "David Radford", "wins": 2.5, "times": 11, "pot": 1, "avg": 1.4545454545454546}, {"name": "Mason Wilkins", "wins": 2.5, "times": 8, "pot": 3, "avg": 1.75}, {"name": "Matt Torcasso", "wins": 2.5, "times": 12, "pot": 1, "avg": 0.9166666666666666}, {"name": "Scotty Wilkins", "wins": 2.5, "times": 10, "pot": 1, "avg": 1.6}, {"name": "Brett Walters", "wins": 2.0, "times": 2, "pot": 0, "avg": 0.5}, {"name": "Chris Farrell", "wins": 2.0, "times": 11, "pot": 0, "avg": 0.5454545454545454}, {"name": "Graham Taylor", "wins": 2.0, "times": 8, "pot": 0, "avg": 1.125}, {"name": "Joey Cabrera", "wins": 2.0, "times": 11, "pot": 5, "avg": 0.8181818181818182}, {"name": "Mike Spoon", "wins": 2.0, "times": 12, "pot": 0, "avg": 1.6666666666666667}, {"name": "Wayne Ball", "wins": 2.0, "times": 6, "pot": 0, "avg": 0.5}, {"name": "Joey Berini", "wins": 1.5, "times": 2, "pot": 1, "avg": -2.0}, {"name": "Patric Westbrook", "wins": 1.5, "times": 3, "pot": 1, "avg": 3.3333333333333335}, {"name": "Tim C", "wins": 1.5, "times": 2, "pot": 1, "avg": 1.5}, {"name": "Andrew white", "wins": 1.0, "times": 6, "pot": 0, "avg": 1.5}, {"name": "Bill Elkins", "wins": 1.0, "times": 5, "pot": 0, "avg": 2.4}, {"name": "Brad Grabarek", "wins": 1.0, "times": 11, "pot": 2, "avg": 1.8181818181818181}, {"name": "Danny Williams", "wins": 1.0, "times": 10, "pot": 0, "avg": 1.1}, {"name": "Drew Froman", "wins": 1.0, "times": 7, "pot": 0, "avg": 3.142857142857143}, {"name": "Greg Slaughter", "wins": 1.0, "times": 2, "pot": 0, "avg": 1.0}, {"name": "Jamie Haigler", "wins": 1.0, "times": 1, "pot": 0, "avg": 0.0}, {"name": "Justin Hall", "wins": 1.0, "times": 6, "pot": 1, "avg": 1.1666666666666667}, {"name": "Mike Guzman", "wins": 1.0, "times": 17, "pot": 0, "avg": 2.235294117647059}, {"name": "Mike Morris", "wins": 1.0, "times": 9, "pot": 0, "avg": 0.5555555555555556}, {"name": "Paul Ratkovic", "wins": 1.0, "times": 4, "pot": 0, "avg": 1.0}, {"name": "Walter Bach", "wins": 1.0, "times": 8, "pot": 0, "avg": 0.625}, {"name": "Andrew George", "wins": 0.5, "times": 3, "pot": 1, "avg": 3.6666666666666665}, {"name": "Joe Ristiano", "wins": 0.5, "times": 1, "pot": 1, "avg": 5.0}, {"name": "Matt Brooks", "wins": 0.5, "times": 1, "pot": 1, "avg": 2.0}, {"name": "Owen Merritt", "wins": 0.5, "times": 1, "pot": 1, "avg": 7.0}, {"name": "Rick Whitaker", "wins": 0.5, "times": 9, "pot": 1, "avg": 2.888888888888889}];
+
+const CART_COLORS = [
+  '#e83030','#f5c842','#2ec82e','#3a9ff5','#e84de8','#ff7b00',
+  '#00e5e5','#ffffff','#ff69b4','#a2ff3a','#ffa07a','#b87fff',
+  '#7fffd4','#ff4500','#1e90ff','#ffec8b','#adff2f','#dc143c'
+];
+
+let golfers = [];
+let cartEls = [];
+let animRunning = false;
+
+const track = document.getElementById('race-track');
+const statusBar = document.getElementById('status-bar');
+const overlay = document.getElementById('lights-overlay');
+const lightRow = document.getElementById('light-row');
+const lightsLabel = document.getElementById('lights-label');
+const warning = document.getElementById('setup-warning');
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = '', quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (c === '"') quoted = false;
+      else field += c;
+    } else {
+      if (c === '"') quoted = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c !== '\r') field += c;
+    }
+  }
+  row.push(field);
+  if (row.some(v => v !== '')) rows.push(row);
+  return rows;
+}
+
+function normalizeRows(rows) {
+  if (!rows.length) return [];
+  const headers = rows[0].map(h => String(h).trim().toLowerCase());
+  const indexOf = (...names) => {
+    for (const n of names) {
+      const i = headers.findIndex(h => h === n || h.includes(n));
+      if (i >= 0) return i;
+    }
+    return -1;
+  };
+  const nameCol = indexOf('golfer', 'name');
+  const winsCol = indexOf('wins');
+  const timesCol = indexOf('times @ tee', 'times', 'tee');
+  const potCol = indexOf('2pot', '2 pot');
+  const avgCol = indexOf('avg net score', 'avg net', 'average net');
+
+  if (nameCol < 0 || winsCol < 0) throw new Error('Could not find Golfer and Wins columns.');
+
+  return rows.slice(1).map(r => ({
+    name: String(r[nameCol] || '').trim(),
+    wins: Number(r[winsCol]) || 0,
+    times: timesCol >= 0 ? (Number(r[timesCol]) || 0) : 0,
+    pot: potCol >= 0 ? (Number(r[potCol]) || 0) : 0,
+    avg: avgCol >= 0 && r[avgCol] !== '' && !String(r[avgCol]).includes('#')
+      ? Number(r[avgCol]) : null
+  }))
+  .filter(g => g.name && g.wins > 0)
+  .sort((a,b) => b.wins - a.wins || a.name.localeCompare(b.name));
+}
+
+async function loadData() {
+  statusBar.textContent = 'LOADING LIVE LEADERBOARD…';
+  const configured = SPREADSHEET_CSV_URL.startsWith('https://');
+  try {
+    if (!configured) throw new Error('Spreadsheet URL has not been configured.');
+    const separator = SPREADSHEET_CSV_URL.includes('?') ? '&' : '?';
+    const response = await fetch(SPREADSHEET_CSV_URL + separator + '_=' + Date.now(), { cache: 'no-store' });
+    if (!response.ok) throw new Error('Spreadsheet returned HTTP ' + response.status);
+    const csv = await response.text();
+    golfers = normalizeRows(parseCSV(csv));
+    if (!golfers.length) throw new Error('No players with wins were found.');
+    warning.style.display = 'none';
+    statusBar.textContent = 'LIVE DATA LOADED — PRESS START RACE!';
+  } catch (error) {
+    golfers = FALLBACK_DATA.slice().sort((a,b) => b.wins - a.wins || a.name.localeCompare(b.name));
+    warning.style.display = 'block';
+    warning.textContent = configured
+      ? 'Live spreadsheet could not be loaded. Showing the built-in July 29 snapshot. ' + error.message
+      : 'Setup needed: paste your published Google Sheets CSV URL into SPREADSHEET_CSV_URL. Showing the built-in July 29 snapshot for now.';
+    statusBar.textContent = 'SNAPSHOT DATA LOADED — PRESS START RACE!';
+  }
+  buildTrack();
+  updateSummary();
+}
+
+function updateSummary() {
+  const leader = golfers[0];
+  document.getElementById('leader-name').textContent = leader ? leader.name : '—';
+  document.getElementById('leader-wins').textContent = leader ? formatNumber(leader.wins) : '—';
+  document.getElementById('player-count').textContent = golfers.length;
+  document.getElementById('last-updated').textContent = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+}
+
+function formatNumber(value) {
+  if (value === null || value === undefined || Number.isNaN(value)) return '—';
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
+
+function makeCartSVG(color) {
+  return `<svg width="54" height="32" viewBox="0 0 54 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="2" y="14" width="40" height="13" rx="4" fill="${color}" stroke="#fff" stroke-width="1"/>
+    <rect x="8" y="7" width="20" height="12" rx="3" fill="${color}" stroke="#fff" stroke-width="1"/>
+    <rect x="9" y="9" width="8" height="7" rx="1" fill="rgba(150,220,255,.7)" stroke="#fff" stroke-width=".5"/>
+    <rect x="19" y="9" width="8" height="7" rx="1" fill="rgba(150,220,255,.7)" stroke="#fff" stroke-width=".5"/>
+    <circle cx="10" cy="28" r="4.5" fill="#222" stroke="#ccc" stroke-width="1.2"/>
+    <circle cx="10" cy="28" r="2" fill="#888"/>
+    <circle cx="32" cy="28" r="4.5" fill="#222" stroke="#ccc" stroke-width="1.2"/>
+    <circle cx="32" cy="28" r="2" fill="#888"/>
+    <rect x="42" y="17" width="10" height="3" rx="1.5" fill="#f5c842"/>
+    <circle cx="52" cy="18.5" r="2" fill="#fffbe0" opacity=".85"/>
+  </svg>`;
+}
+
+function buildTrack() {
+  track.innerHTML = '';
+  cartEls = [];
+  golfers.forEach((g, i) => {
+    const lane = document.createElement('div');
+    lane.className = 'lane';
+
+    const rank = document.createElement('div');
+    rank.className = 'rank';
+    rank.textContent = i + 1;
+
+    const name = document.createElement('div');
+    name.className = 'golfer-name';
+    name.textContent = g.name;
+    name.title = g.name;
+
+    const trackArea = document.createElement('div');
+    trackArea.className = 'track-area';
+
+    const trackLine = document.createElement('div');
+    trackLine.className = 'track-line';
+
+    const finishLine = document.createElement('div');
+    finishLine.className = 'finish-line';
+
+    const cart = document.createElement('div');
+    cart.className = 'cart-container';
+    cart.innerHTML = makeCartSVG(CART_COLORS[i % CART_COLORS.length]);
+
+    const wins = document.createElement('div');
+    wins.className = 'stat wins';
+    wins.textContent = formatNumber(g.wins);
+
+    const times = document.createElement('div');
+    times.className = 'stat optional-stat';
+    times.textContent = g.times;
+
+    const avg = document.createElement('div');
+    avg.className = 'stat optional-stat';
+    avg.textContent = g.avg === null ? '—' : g.avg.toFixed(1);
+
+    trackArea.append(trackLine, cart, finishLine);
+    lane.append(rank, name, trackArea, wins, times, avg);
+    track.appendChild(lane);
+    cartEls.push(cart);
+  });
+}
+
+function resetRace() {
+  if (animRunning) return;
+  cartEls.forEach(c => {
+    c.style.transition = 'none';
+    c.style.left = '4px';
+  });
+  statusBar.textContent = 'PLACE YOUR BETS — PRESS START RACE!';
+  document.getElementById('btn-start').disabled = false;
+}
+
+function startRace() {
+  if (animRunning || !golfers.length) return;
+  document.getElementById('btn-start').disabled = true;
+  cartEls.forEach(c => {
+    c.style.transition = 'none';
+    c.style.left = '4px';
+  });
+  void document.body.offsetWidth;
+  showLights();
+}
+
+function showLights() {
+  animRunning = true;
+  lightRow.innerHTML = '';
+  const lights = Array.from({length:5}, () => {
+    const light = document.createElement('div');
+    light.className = 'light';
+    lightRow.appendChild(light);
+    return light;
+  });
+  lightsLabel.textContent = 'READY…';
+  overlay.classList.add('visible');
+
+  let step = 0;
+  const sequence = [
+    () => { lights[0].classList.add('red'); lightsLabel.textContent = 'SET…'; },
+    () => lights[1].classList.add('red'),
+    () => lights[2].classList.add('red'),
+    () => lights[3].classList.add('red'),
+    () => { lights[4].classList.add('red'); lightsLabel.textContent = 'GO!'; },
+    () => {
+      lights.forEach(l => l.className = 'light green');
+      setTimeout(() => {
+        overlay.classList.remove('visible');
+        runRace();
+      }, 450);
+    }
+  ];
+
+  function tick() {
+    sequence[step++]();
+    if (step < sequence.length) setTimeout(tick, 450);
+  }
+  tick();
+}
+
+function runRace() {
+  statusBar.textContent = '🏌️ THEY\'RE OFF!';
+  const maxWins = Math.max(...golfers.map(g => g.wins));
+  const maxTravel = Math.max(30, cartEls[0].parentElement.offsetWidth - 54 - 18 - 8);
+  const steps = 60;
+  let step = 0;
+
+  function animate() {
+    step++;
+    const progress = step / steps;
+    const eased = progress < .5 ? 4*progress*progress*progress : 1 - Math.pow(-2*progress+2,3)/2;
+
+    golfers.forEach((g, i) => {
+      const finalPos = maxTravel * (g.wins / maxWins);
+      const noise = (Math.random() - .5) * 8 * (1 - eased);
+      const pos = Math.max(0, Math.min(finalPos, finalPos * eased + noise));
+      cartEls[i].style.transition = 'left .12s linear';
+      cartEls[i].style.left = Math.round(pos + 4) + 'px';
+    });
+
+    if (step < steps) {
+      requestAnimationFrame(animate);
+    } else {
+      golfers.forEach((g, i) => {
+        cartEls[i].style.transition = 'left .3s ease-out';
+        cartEls[i].style.left = Math.round(maxTravel * (g.wins / maxWins) + 4) + 'px';
+      });
+      setTimeout(() => {
+        const leader = golfers[0];
+        statusBar.textContent = `🏆 ${leader.name.toUpperCase()} LEADS WITH ${formatNumber(leader.wins)} WINS!`;
+        animRunning = false;
+        document.getElementById('btn-start').disabled = false;
+      }, 400);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+document.getElementById('btn-start').addEventListener('click', startRace);
+document.getElementById('btn-reset').addEventListener('click', resetRace);
+document.getElementById('btn-refresh').addEventListener('click', () => {
+  if (!animRunning) loadData();
+});
+
+loadData();
+</script>
+</body>
+</html>
