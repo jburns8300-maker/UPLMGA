@@ -57,7 +57,7 @@
   }
   #scoreboard-header {
     display: grid;
-    grid-template-columns: 38px minmax(135px, 1.15fr) minmax(180px, 3fr) 58px 66px 72px;
+    grid-template-columns: 38px minmax(135px, 1.15fr) minmax(180px, 3fr) 58px 58px 66px 72px;
     align-items: center;
     padding: 8px 10px;
     background: rgba(0,0,0,.55);
@@ -71,7 +71,7 @@
   #race-track { position: relative; padding: 5px 0; }
   .lane {
     display: grid;
-    grid-template-columns: 38px minmax(135px, 1.15fr) minmax(180px, 3fr) 58px 66px 72px;
+    grid-template-columns: 38px minmax(135px, 1.15fr) minmax(180px, 3fr) 58px 58px 66px 72px;
     align-items: center;
     min-height: 44px;
     border-bottom: 1px solid rgba(255,255,255,.08);
@@ -235,7 +235,7 @@
   </div>
   <div id="scoreboard-header">
     <span>#</span><span>Golfer</span><span>Race Track</span>
-    <span>Wins</span><span class="optional-stat">Tee</span><span class="optional-stat">Avg Net</span>
+    <span>Wins</span><span class="optional-stat">2Pot</span><span class="optional-stat">Tee</span><span class="optional-stat">Avg Net</span>
   </div>
   <div id="race-track"></div>
   <div id="status-bar">LOADING LIVE LEADERBOARD…</div>
@@ -260,7 +260,7 @@ SETUP:
 Recommended URL format:
 https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/gviz/tq?tqx=out:csv&sheet=Total%20Wins
 */
-const SPREADSHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT93dXGwSNmK8AIcYZ-Ub7xESs0bSEHzUzSrqI_x-NxRLEVz4M_6-xkUeS-bSKYrHKL8BtRYnpTHXp3/pub?gid=1851992239&single=true&output=csv";
+const SPREADSHEET_CSV_URL = "PASTE_YOUR_PUBLISHED_GOOGLE_SHEET_CSV_URL_HERE";
 
 const FALLBACK_DATA = [{"name": "Denis Hayes", "wins": 7.0, "times": 15, "pot": 1, "avg": -0.13333333333333333}, {"name": "Jimmy McGuire", "wins": 6.5, "times": 17, "pot": 1, "avg": 0.4117647058823529}, {"name": "Barry Perry", "wins": 5.0, "times": 16, "pot": 0, "avg": 2.0625}, {"name": "Dick Pilotte", "wins": 5.0, "times": 13, "pot": 0, "avg": 0.6153846153846154}, {"name": "Jason Poe", "wins": 3.5, "times": 11, "pot": 3, "avg": 0.5454545454545454}, {"name": "Jerry Neal", "wins": 3.5, "times": 16, "pot": 1, "avg": 1.5625}, {"name": "Josh Burns", "wins": 3.0, "times": 17, "pot": 4, "avg": 1.411764705882353}, {"name": "Tim Rutt", "wins": 3.0, "times": 10, "pot": 0, "avg": 1.4}, {"name": "David Radford", "wins": 2.5, "times": 11, "pot": 1, "avg": 1.4545454545454546}, {"name": "Mason Wilkins", "wins": 2.5, "times": 8, "pot": 3, "avg": 1.75}, {"name": "Matt Torcasso", "wins": 2.5, "times": 12, "pot": 1, "avg": 0.9166666666666666}, {"name": "Scotty Wilkins", "wins": 2.5, "times": 10, "pot": 1, "avg": 1.6}, {"name": "Brett Walters", "wins": 2.0, "times": 2, "pot": 0, "avg": 0.5}, {"name": "Chris Farrell", "wins": 2.0, "times": 11, "pot": 0, "avg": 0.5454545454545454}, {"name": "Graham Taylor", "wins": 2.0, "times": 8, "pot": 0, "avg": 1.125}, {"name": "Joey Cabrera", "wins": 2.0, "times": 11, "pot": 5, "avg": 0.8181818181818182}, {"name": "Mike Spoon", "wins": 2.0, "times": 12, "pot": 0, "avg": 1.6666666666666667}, {"name": "Wayne Ball", "wins": 2.0, "times": 6, "pot": 0, "avg": 0.5}, {"name": "Joey Berini", "wins": 1.5, "times": 2, "pot": 1, "avg": -2.0}, {"name": "Patric Westbrook", "wins": 1.5, "times": 3, "pot": 1, "avg": 3.3333333333333335}, {"name": "Tim C", "wins": 1.5, "times": 2, "pot": 1, "avg": 1.5}, {"name": "Andrew white", "wins": 1.0, "times": 6, "pot": 0, "avg": 1.5}, {"name": "Bill Elkins", "wins": 1.0, "times": 5, "pot": 0, "avg": 2.4}, {"name": "Brad Grabarek", "wins": 1.0, "times": 11, "pot": 2, "avg": 1.8181818181818181}, {"name": "Danny Williams", "wins": 1.0, "times": 10, "pot": 0, "avg": 1.1}, {"name": "Drew Froman", "wins": 1.0, "times": 7, "pot": 0, "avg": 3.142857142857143}, {"name": "Greg Slaughter", "wins": 1.0, "times": 2, "pot": 0, "avg": 1.0}, {"name": "Jamie Haigler", "wins": 1.0, "times": 1, "pot": 0, "avg": 0.0}, {"name": "Justin Hall", "wins": 1.0, "times": 6, "pot": 1, "avg": 1.1666666666666667}, {"name": "Mike Guzman", "wins": 1.0, "times": 17, "pot": 0, "avg": 2.235294117647059}, {"name": "Mike Morris", "wins": 1.0, "times": 9, "pot": 0, "avg": 0.5555555555555556}, {"name": "Paul Ratkovic", "wins": 1.0, "times": 4, "pot": 0, "avg": 1.0}, {"name": "Walter Bach", "wins": 1.0, "times": 8, "pot": 0, "avg": 0.625}, {"name": "Andrew George", "wins": 0.5, "times": 3, "pot": 1, "avg": 3.6666666666666665}, {"name": "Joe Ristiano", "wins": 0.5, "times": 1, "pot": 1, "avg": 5.0}, {"name": "Matt Brooks", "wins": 0.5, "times": 1, "pot": 1, "avg": 2.0}, {"name": "Owen Merritt", "wins": 0.5, "times": 1, "pot": 1, "avg": 7.0}, {"name": "Rick Whitaker", "wins": 0.5, "times": 9, "pot": 1, "avg": 2.888888888888889}];
 
@@ -418,6 +418,10 @@ function buildTrack() {
     wins.className = 'stat wins';
     wins.textContent = formatNumber(g.wins);
 
+    const pot = document.createElement('div');
+    pot.className = 'stat optional-stat';
+    pot.textContent = g.pot;
+
     const times = document.createElement('div');
     times.className = 'stat optional-stat';
     times.textContent = g.times;
@@ -427,7 +431,7 @@ function buildTrack() {
     avg.textContent = g.avg === null ? '—' : g.avg.toFixed(1);
 
     trackArea.append(trackLine, cart, finishLine);
-    lane.append(rank, name, trackArea, wins, times, avg);
+    lane.append(rank, name, trackArea, wins, pot, times, avg);
     track.appendChild(lane);
     cartEls.push(cart);
   });
